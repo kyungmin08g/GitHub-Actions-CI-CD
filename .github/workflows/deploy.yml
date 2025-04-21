@@ -1,0 +1,14 @@
+name: GitHub Action CI/CD
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  My-Job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Hello, World! 프린트 찍기
+        run: echo "Hello, World!"
