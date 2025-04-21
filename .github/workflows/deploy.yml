@@ -12,3 +12,8 @@ jobs:
     steps:
       - name: Hello, World! 프린트 찍기
         run: echo "Hello, World!"
+
+      - name: GitHub Secret 사용해보기
+        run: |
+          echo ${{ secrets.MY_NAME }}
+          echo ${{ secrets.MY_AGE }}
