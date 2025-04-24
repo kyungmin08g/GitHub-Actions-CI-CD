@@ -1,3 +1,7 @@
 spring:
   application:
     name: CI-CD
+
+  # 기본적으로 dev에 있는 user-name을 사용하겠다는 의미
+  profiles:
+    active: dev
