@@ -38,3 +38,8 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+// application-plugin.jar 생성 금지
+jar {
+    enabled = false
+}
