@@ -1,0 +1,38 @@
+name: GitHub Actions Dev CI/CD
+
+on:
+  pull_request:
+    types: [ closed ]
+  workflow_dispatch:
+
+jobs:
+  bulid:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+
+    steps:
+      - name: 코드 가져오기
+        run: actions/checkout@v4
+
+      - name: 자바 17 설치
+        run: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: 권한 부여
+        run: chmod +x ./gradlew
+        shell: bash
+
+      - name: Gradle 빌드
+        run: ./gradlew clean build -x test
+        shell: bash
+
+      - name: 배포 준비
+        run: |
+          mkdir -p deploy
+          cp build/libs/*.jar deploy/application.jar
+          cp Procfile deploy/Procfile
+          cp -r .ebextensions deploy/.ebextensions
+          cp -r .platform deploy/.platform
+          cd deploy && zip -r deploy.zip
