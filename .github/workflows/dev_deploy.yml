@@ -48,7 +48,7 @@ jobs:
           cp -r .platform deploy/.platform
           cd deploy && zip -r deploy.zip .
 
-      - name: Elastic Beanstalk에 배포 (CD 실행)
+      - name: Elastic Beanstalk에 배포
         uses: einaregilsson/beanstalk-deploy@v20
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
