@@ -28,11 +28,33 @@ jobs:
         run: ./gradlew clean build -x test
         shell: bash
 
+      - name: 실행 시간 구하기
+        uses: 1466587594/get-current-time@v2
+        with:
+          format: YYYY-MM-DDTHH-mm-ss
+          utcOffset: "+09:00"
+
+      - name: 시간 보여주기
+        run: echo "CurrentTime=$"
+        shell: bash
+
       - name: 배포 준비
         run: |
           mkdir -p deploy
           cp build/libs/*.jar deploy/application.jar
           cp Procfile deploy/Procfile
-          cp -r .ebextensions deploy/.ebextensions
+          cp -r .ebextensions_dev deploy/.ebextensions
           cp -r .platform deploy/.platform
           cd deploy && zip -r deploy.zip
+
+      - name: Elastic Beanstalk에 배포 (CD 실행)
+        uses: einaregilsson/beanstalk-deploy@v20
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KET_ID }}
+          application_name: test-elb
+          environment_name: Test-elb-env
+          version_label: github-action-${{ steps.current-time.outputs.formattedTime }}
+          region: ap-northeast-2
+          deployment_package: deploy/deploy.zip
+          wait_for_deployment: false
