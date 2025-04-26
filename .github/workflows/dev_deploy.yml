@@ -30,6 +30,7 @@ jobs:
 
       - name: 실행 시간 구하기
         uses: 1466587594/get-current-time@v2
+        id: current-time
         with:
           format: YYYY-MM-DDTHH-mm-ss
           utcOffset: "+09:00"
@@ -45,7 +46,7 @@ jobs:
           cp Procfile deploy/Procfile
           cp -r .ebextensions_dev deploy/.ebextensions
           cp -r .platform deploy/.platform
-          cd deploy && zip -r deploy.zip
+          cd deploy && zip -r deploy.zip .
 
       - name: Elastic Beanstalk에 배포 (CD 실행)
         uses: einaregilsson/beanstalk-deploy@v20
