@@ -17,4 +17,9 @@ public class CheckController {
     System.out.println("이름은? " + name);
     return "Hello World!";
   }
+
+  @GetMapping(value = "/health")
+  public String healthCheck() {
+    return "ok";
+  }
 }
