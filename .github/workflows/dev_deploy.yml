@@ -1,45 +1,42 @@
 name: GitHub Actions Dev CI/CD
 
+# merge가 되었을 때 CI/CD가 동작하도록 하자.
 on:
   pull_request:
-    types: [ closed ]
-  workflow_dispatch:
+    types: [ closed ] # -> merge
+  workflow_dispatch: # 수동 실행이 가능하도록
 
 jobs:
   bulid:
+    # 실행할 컴퓨터의 OS
     runs-on: ubuntu-latest
+
+    # main 브랜치에 merge가 되면 CI/CD를 실행하자.
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
 
     steps:
+        # merge된 코드 가져오기
       - name: 코드 가져오기
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Github Actions에 있는 checkout v4를 사용하자.
 
       - name: 자바 17 설치
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v3 # Github Actions에 있는 setup-java v3을 사용하자.
         with:
-          java-version: 17
+          java-version: 17 # 자바 버전
           distribution: 'temurin'
 
+        # Gradle를 빌드하기 위해 OS에 권한을 주자.
       - name: 권한 부여
         run: chmod +x ./gradlew
         shell: bash
 
+        # 빌드
       - name: Gradle 빌드
         run: ./gradlew clean build -x test
         shell: bash
 
-      - name: 실행 시간 구하기
-        uses: 1466587594/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYY-MM-DDTHH-mm-ss
-          utcOffset: "+09:00"
-
-      - name: 시간 보여주기
-        run: echo "CurrentTime=$"
-        shell: bash
-
       - name: 배포 준비
+        # 리눅스 명령어 (mkdir: 폴더 생성, cp: 복사)
         run: |
           mkdir -p deploy
           cp build/libs/*.jar deploy/application.jar
@@ -48,14 +45,17 @@ jobs:
           cp -r .platform deploy/.platform
           cd deploy && zip -r deploy.zip .
 
+        # CD
       - name: Elastic Beanstalk에 배포
-        uses: einaregilsson/beanstalk-deploy@v20
+        # 누군가 einaregilsson라는 EB에 배포할 수 있도록 하는 라이브러리를 만들었는데 그걸 사용할거다.
+        uses: einaregilsson/beanstalk-deploy@v20 # beanstalk-deploy v20를 사용하자.
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_KET_ID }}
-          application_name: test-elb
-          environment_name: Test-elb-env
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }} # EB에 대한 접근 권한 1
+          aws_secret_key: ${{ secrets.AWS_SECRET_KET_ID }} # EB에 대한 접근 권한 2
+          application_name: test-elb # 애플리케이션 이름
+          environment_name: Test-elb-env # EB에 환경 이름
+          # version_label는 필수 입력으로 EB는 버전 단위로 배포를 관리하기 때문에 커밋 ID로 매번 다른 버전으로 업데이트 -> 고유해야함!
           version_label: github-action-${{ github.sha }}
-          region: ap-northeast-2
-          deployment_package: deploy/deploy.zip
-          wait_for_deployment: false
+          region: ap-northeast-2 # EB 리전
+          deployment_package: deploy/deploy.zip # 배포 준비 때 만들어준 압축 파일을 실행시킬거다.
+          wait_for_deployment: false # CD까지 완료되면 그때 GitHub Actions가 완료 처리함. -> 그걸 안하겠다는 소리
