@@ -55,7 +55,7 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_KET_ID }}
           application_name: test-elb
           environment_name: Test-elb-env
-          version_label: github-action-${{ steps.current-time.outputs.formattedTime }}
+          version_label: ''
           region: ap-northeast-2
           deployment_package: deploy/deploy.zip
           wait_for_deployment: false
